@@ -2,44 +2,58 @@ import pygame
 from pygame.locals import *
 import sys
 import os
-
-
-def events():
-    for event in pygame.event.get():
-        if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-            pygame.quit()
-            sys.exit()
+from BusinessLayer.Robot import Robot
 
 
 # define display surface
-W, H = 1000, 600
-AREA = W * H
+WIDTH, HEIGHT = 1000, 600
 
 
 # setup pygame
 pygame.init()
-CLOCK = pygame.time.Clock()
+pygame.display.set_caption("RoboFight")
+clock = pygame.time.Clock()
 os.environ['SDL_VIDEO_CENTERED'] = '1'
-DS = pygame.display.set_mode((W, H))
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS = 60
 
+# set background
 background = pygame.image.load("../img/background.png").convert()
 x = 0
 
-# main loop
-while True:
-    events()
+# game loop
+running = True
+all_sprites = pygame.sprite.Group()
+robot = Robot(WIDTH/2, HEIGHT-60)
+all_sprites.add(robot)
+
+while running:
+    # keep loop running at the right speed
+    clock.tick(FPS)
+    # Process input (events)
+    for event in pygame.event.get():
+        # check for closing window
+        if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == pygame.K_q):
+            running = False
+
+    # Update
+    all_sprites.update()
+
+    # Draw / render
+    #screen.fill(BLACK)
     rel_x = x % background.get_rect().width
-    DS.blit(background, (rel_x - background.get_rect().width, 0))
-    if rel_x < W:
-        DS.blit(background, (rel_x, 0))
+    screen.blit(background, (rel_x - background.get_rect().width, 0))
+    if rel_x < WIDTH:
+        screen.blit(background, (rel_x, 0))
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_RIGHT] and x > -1000:
         x -= 5
     if keys[pygame.K_LEFT] and x < 1000:
         x += 5
+    all_sprites.draw(screen)
+    # *after* drawing everything, flip the display
+    pygame.display.flip()
 
-    print(x)
-    pygame.display.update()
-    CLOCK.tick(FPS)
+
+pygame.quit()
