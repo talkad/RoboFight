@@ -1,6 +1,5 @@
 import pygame
 from pygame.locals import *
-import sys
 import os
 from BusinessLayer.Robot import Robot
 
@@ -39,8 +38,7 @@ while running:
     # Update
     all_sprites.update()
 
-    # Draw / render
-    #screen.fill(BLACK)
+    # Draw
     rel_x = x % background.get_rect().width
     screen.blit(background, (rel_x - background.get_rect().width, 0))
     if rel_x < WIDTH:
