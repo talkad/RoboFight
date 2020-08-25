@@ -1,6 +1,8 @@
 import pygame
 from pygame.locals import *
 import os
+
+from BusinessLayer.Board import Board
 from BusinessLayer.Robot import Robot
 
 
@@ -16,15 +18,15 @@ os.environ['SDL_VIDEO_CENTERED'] = '1'
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS = 60
 
-# set background
-background = pygame.image.load("../img/background.png").convert()
-x = 0
 
 # game loop
 running = True
 all_sprites = pygame.sprite.Group()
 robot = Robot(WIDTH/2, HEIGHT-60)
 all_sprites.add(robot)
+
+background = pygame.image.load("../img/background.png").convert()
+board = Board(background, robot)
 
 while running:
     # keep loop running at the right speed
@@ -38,17 +40,13 @@ while running:
     # Update
     all_sprites.update()
 
-    # Draw
-    rel_x = x % background.get_rect().width
-    screen.blit(background, (rel_x - background.get_rect().width, 0))
+    # draw background
+    board.game_cycle()
+    rel_x = board.background_x % board.image.get_rect().width
+    screen.blit(board.image, (rel_x - board.image.get_rect().width, 0))
     if rel_x < WIDTH:
-        screen.blit(background, (rel_x, 0))
+        screen.blit(board.image, (rel_x, 0))
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_RIGHT] and x > -1000:
-        x -= 5
-    if keys[pygame.K_LEFT] and x < 1000:
-        x += 5
     all_sprites.draw(screen)
     # *after* drawing everything, flip the display
     pygame.display.flip()

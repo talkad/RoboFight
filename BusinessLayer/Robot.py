@@ -1,5 +1,3 @@
-from enum import Enum
-
 import pygame
 
 BLACK = (0, 0, 0)
@@ -27,7 +25,7 @@ class Robot(pygame.sprite.Sprite):
         # self.radius = 20
         self.rect.centerx = x
         self.rect.bottom = y
-        self.speed = 5
+        self.speedx = 5
         self.last_direction = DIRECTION[1]
         # for sprite functionality
         self.frame = 0
