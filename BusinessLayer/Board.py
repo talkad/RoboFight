@@ -13,19 +13,21 @@ class Board:
     # 1. the board boundary didnt reach- so the background scrolls
     # 2. otherwise the robot moves
     def game_cycle(self):
+        speed = self.player.speedx
         keys = pygame.key.get_pressed()
+
         if keys[pygame.K_RIGHT]:
             if self.player.rect.centerx < 500:
-                self.player.rect.x += 6
+                self.player.rect.x += speed
             elif self.background_x > -1000:
-                self.background_x -= 6
+                self.background_x -= speed
             elif self.player.rect.centerx < 945:
-                self.player.rect.x += 6
+                self.player.rect.x += speed
 
         if keys[pygame.K_LEFT]:
             if self.player.rect.centerx > 500:
-                self.player.rect.x -= 6
+                self.player.rect.x -= speed
             elif self.background_x < 1000:
-                self.background_x += 6
+                self.background_x += speed
             elif self.player.rect.centerx > 55:
-                self.player.rect.x -= 6
+                self.player.rect.x -= speed

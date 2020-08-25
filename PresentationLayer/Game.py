@@ -22,7 +22,7 @@ FPS = 60
 # game loop
 running = True
 all_sprites = pygame.sprite.Group()
-robot = Robot(WIDTH/2, HEIGHT-60)
+robot = Robot(WIDTH/2, HEIGHT-70)
 all_sprites.add(robot)
 
 background = pygame.image.load("../img/background.png").convert()

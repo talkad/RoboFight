@@ -25,7 +25,7 @@ class Robot(pygame.sprite.Sprite):
         # self.radius = 20
         self.rect.centerx = x
         self.rect.bottom = y
-        self.speedx = 5
+        self.speedx = 6
         self.last_direction = DIRECTION[1]
         # for sprite functionality
         self.frame = 0
