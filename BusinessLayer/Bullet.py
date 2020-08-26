@@ -2,7 +2,7 @@ import pygame
 
 from BusinessLayer.Settings import BLACK, DIRECTIONS
 
-SPEED = 2
+SPEED = 4
 bullet_sprite = {'Bullet': [[], 5], 'Muzzle': [[], 5]}
 
 

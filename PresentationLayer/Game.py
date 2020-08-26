@@ -3,19 +3,22 @@ from pygame.locals import *
 import os
 from BusinessLayer.Platform import Platform
 from BusinessLayer.Robot import Robot
-from BusinessLayer.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST
-
+from BusinessLayer.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST, BLACK
 
 # setup pygame
 pygame.init()
+pygame.mixer.init()
 pygame.display.set_caption("RoboFight")
 clock = pygame.time.Clock()
 FPS = 60
+font_name = pygame.font.match_font('arial')
 
 clock.tick(FPS)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 background = pygame.image.load("../img/background.png").convert()
+
+explosion_sound = pygame.mixer.Sound("../sound/Explosion.wav")
 
 
 class Game:
@@ -24,7 +27,7 @@ class Game:
         self.platforms = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
         self.background_x = 0
-        self.player = Robot(WIDTH/2, HEIGHT-70, self)
+        self.player = Robot(WIDTH / 2, HEIGHT - 70, self)
         self.running = True
 
     # every cycle of the game, one of two things could happen:
@@ -56,7 +59,6 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            # print(self.player.rect.centerx+(self.background_x * -1))
 
     def update(self):
         # Game Loop - Update
@@ -79,6 +81,7 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     self.player.shoot()
+                    explosion_sound.play()
 
     # draw all objects on the screen
     def draw(self):
@@ -90,8 +93,20 @@ class Game:
             screen.blit(background, (rel_x, 0))
 
         self.all_sprites.draw(screen)
+        self.draw_text(screen, "position: ({:f}, {:f})".format(self.player.pos.x + (self.background_x * -1),
+                                                               self.player.pos.y),
+                       20, WIDTH / 2, 10)
+
         # after drawing everything, flip the display
         pygame.display.flip()
+
+    # draw text
+    def draw_text(self, surf, text, size, x, y):
+        font = pygame.font.Font(font_name, size)
+        text_surface = font.render(text, True, BLACK)
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x, y)
+        surf.blit(text_surface, text_rect)
 
     def show_start_screen(self):
         # game splash/start screen
@@ -108,6 +123,5 @@ board = Game()
 while board.running:
     board.new()
     board.show_go_screen()
-
 
 pygame.quit()
