@@ -22,6 +22,7 @@ class Game:
     def __init__(self):
         self.all_sprites = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
+        self.bullets = pygame.sprite.Group()
         self.background_x = 0
         self.player = Robot(WIDTH/2, HEIGHT-70, self)
         self.running = True
@@ -39,8 +40,8 @@ class Game:
             if self.background_x < 1000:
                 self.background_x += PLAYER_ACC
 
+    # start a new game
     def new(self):
-        # start a new game
         self.all_sprites.add(self.player)
         for plat in PLATFORM_LIST:
             p = Platform(*plat)
@@ -48,8 +49,8 @@ class Game:
             self.platforms.add(p)
         self.run()
 
+    # Game  Main Loop
     def run(self):
-        # Game Loop
         self.running = True
         while self.running:
             self.events()
@@ -62,21 +63,24 @@ class Game:
         self.all_sprites.update()
         # check if player hits a platform - only if falling
         if self.player.vel.y > 0:
+            pygame.sprite.collide_rect_ratio(8)
             hits = pygame.sprite.spritecollide(self.player, self.platforms, False)
             if hits:
                 self.player.pos.y = hits[0].rect.top
                 self.player.vel.y = 0
 
+    # handle key events
     def events(self):
         # Game Loop - events
         for event in pygame.event.get():
             # check for closing window
             if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == pygame.K_q):
                 self.running = False
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    self.player.jump()
+                    self.player.shoot()
 
+    # draw all objects on the screen
     def draw(self):
         # draw background
         board.game_cycle()

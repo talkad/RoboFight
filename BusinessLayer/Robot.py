@@ -1,22 +1,23 @@
 import pygame
 
-from BusinessLayer.Settings import BLACK, DIRECTION, PLAYER_ACC, PLAYER_GRAVITY, PLAYER_FRICTION
+from BusinessLayer.Bullet import Bullet
+from BusinessLayer.Settings import BLACK, DIRECTIONS, PLAYER_ACC, PLAYER_GRAVITY, PLAYER_FRICTION
 
 vec = pygame.math.Vector2
 
 
-robot_sprite = {'Idle': [[], 10], 'Jump': [[], 10], 'JumpMelee': [[], 8], 'Melee': [[], 8], 'Run': [[], 8],
-                'RunShoot': [[], 9], 'Shoot': [[], 4], 'Slide': [[], 10], 'Dead': [[], 10]}
+robot_sprite = {'Idle': [[], 10], 'Jump': [[], 10], 'Run': [[], 8],
+                'Shoot': [[], 4], 'Slide': [[], 10], 'Dead': [[], 10]}
 
 
+# generate a map structure that contains all the states the robot can be during the game
 def create_sprite():
     for key in robot_sprite:
         for i in range(robot_sprite[key][1]):
-            filename = '../img/robot/'+key+' ({}).png'.format(i + 1)
+            filename = '../img/robot/'+key+'__{}_-removebg-preview.png'.format(i + 1)
             img = pygame.image.load(filename).convert()
-            img.set_colorkey(BLACK)
-            img_robot = pygame.transform.scale(img, (250, 250)).convert()
-            robot_sprite[key][0].append(img_robot)
+            img.set_colorkey((0, 0, 0))
+            robot_sprite[key][0].append(img)
 
 
 class Robot(pygame.sprite.Sprite):
@@ -26,18 +27,18 @@ class Robot(pygame.sprite.Sprite):
         self.game = board
         self.image = robot_sprite["Idle"][0][0]
         self.rect = self.image.get_rect()
-        # self.radius = 20
         self.rect.centerx = x
         self.rect.bottom = y
         self.pos = vec(x, y)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
-        self.last_direction = DIRECTION[1]
+        self.last_direction = DIRECTIONS[1]
         # for sprite functionality
         self.frame = 0
         self.last_update = pygame.time.get_ticks()
         self.frame_rate = 55
 
+    # take care of key pressed event
     def update(self):
         self.acc = vec(0, PLAYER_GRAVITY)
         now = pygame.time.get_ticks()
@@ -53,6 +54,8 @@ class Robot(pygame.sprite.Sprite):
                 self.bend()
             elif key_state[pygame.K_UP]:
                 self.jump()
+            elif key_state[pygame.K_SPACE]:
+                self.shoot_pos()
             else:
                 self.idle()
 
@@ -66,7 +69,7 @@ class Robot(pygame.sprite.Sprite):
 
     def move_right(self):
         self.image = robot_sprite["Run"][0][self.frame % robot_sprite["Run"][1]]
-        self.last_direction = DIRECTION[1]
+        self.last_direction = DIRECTIONS[1]
         if self.rect.centerx < 500:
             self.pos.x += PLAYER_ACC * 15
         elif self.rect.centerx < 945 and self.game.background_x <= -1000:
@@ -76,15 +79,16 @@ class Robot(pygame.sprite.Sprite):
         img = robot_sprite["Run"][0][self.frame % robot_sprite["Run"][1]]
         flipped_img = pygame.transform.flip(img, True, False)
         self.image = flipped_img
-        self.last_direction = DIRECTION[0]
+        self.last_direction = DIRECTIONS[0]
         if self.rect.centerx > 500:
             self.pos.x -= PLAYER_ACC * 15
         elif self.rect.centerx > 55 and self.game.background_x >= 1000:
             self.pos.x -= PLAYER_ACC * 15
 
+    # update the current frame of the sprite according the last direction the robot moved
     def sprite_by_direction(self, sprite):
         img = robot_sprite[sprite][0][self.frame % robot_sprite[sprite][1]]
-        if self.last_direction == DIRECTION[1]:
+        if self.last_direction == DIRECTIONS[1]:
             self.image = img
         else:
             self.image = pygame.transform.flip(img, True, False)
@@ -94,10 +98,21 @@ class Robot(pygame.sprite.Sprite):
 
     def bend(self):
         self.sprite_by_direction("Slide")
+        self.pos.y += 55
 
     def jump(self):
         self.sprite_by_direction("Jump")
-
         hits = pygame.sprite.spritecollide(self, self.game.platforms, False)
         if hits:
             self.vel.y = -20
+
+    def shoot_pos(self):
+        self.sprite_by_direction("Shoot")
+
+    def shoot(self):
+        x_offset = 30
+        if self.last_direction == DIRECTIONS[0]:
+            x_offset = -30
+        bullet = Bullet(self.rect.centerx + x_offset, self.rect.centery, self.last_direction)
+        self.game.all_sprites.add(bullet)
+        self.game.bullets.add(bullet)

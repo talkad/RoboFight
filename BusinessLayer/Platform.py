@@ -13,6 +13,8 @@ class Platform(pygame.sprite.Sprite):
         self.rect.y = y
         self.limit = 0
 
+    # move the platforms with the background
+    # as long as the limit hasn't reached
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and self.limit < 1850:
