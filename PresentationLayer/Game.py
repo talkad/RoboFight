@@ -2,13 +2,13 @@ import os
 
 import pygame
 from pygame.locals import *
-
 from BusinessLayer.Platform import Platform
 from BusinessLayer.Robot import Robot
+from BusinessLayer.Bullet import Explosion
 from BusinessLayer.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST
-# setup pygame
-from PresentationLayer.Service import draw_text, concat_char
+from PresentationLayer.Service import draw_text, concat_char, get_max
 
+# setup pygame
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("RoboFight")
@@ -74,9 +74,22 @@ class Game:
         if self.player.vel.y > 0:
             pygame.sprite.collide_rect_ratio(8)
             hits = pygame.sprite.spritecollide(self.player, self.platforms, False)
-            if hits:
-                self.player.pos.y = hits[0].rect.top
+            legal_hits = []
+            for hit in hits:
+                if self.player.pos.y - 20 < hit.rect.top < self.player.pos.y:
+                    legal_hits.append(hit.rect.top)
+
+            platform_height = get_max(legal_hits)
+            if platform_height != -1:
+                # self.player.pos.y = hits[0].rect.top
+                self.player.pos.y = get_max(legal_hits)
                 self.player.vel.y = 0
+
+        # check if a bullet hits a platform
+        bullet_hits = pygame.sprite.groupcollide(self.bullets, self.platforms, True, False)
+        for bullet in bullet_hits:
+            explosion = Explosion(bullet.rect.center)
+            self.all_sprites.add(explosion)
 
     # handle key events
     def events(self):
@@ -85,10 +98,9 @@ class Game:
             # check mouse clicked event for add platforms
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
-                p = Platform(x, y, 150, 20, self)
+                p = Platform(x - 75, y, 150, 20, self)
                 self.all_sprites.add(p)
                 self.platforms.add(p)
-                print(x)
 
             # add the key to the text
             if event.type == pygame.KEYDOWN:

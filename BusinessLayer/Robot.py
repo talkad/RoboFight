@@ -5,7 +5,6 @@ from BusinessLayer.Settings import DIRECTIONS, PLAYER_ACC, PLAYER_GRAVITY, PLAYE
 
 vec = pygame.math.Vector2
 
-
 robot_sprite = {'Idle': [[], 10], 'Jump': [[], 10], 'Run': [[], 8],
                 'Shoot': [[], 4], 'Slide': [[], 10], 'Dead': [[], 10]}
 
@@ -14,7 +13,7 @@ robot_sprite = {'Idle': [[], 10], 'Jump': [[], 10], 'Run': [[], 8],
 def create_sprite():
     for key in robot_sprite:
         for i in range(robot_sprite[key][1]):
-            filename = '../img/robot/'+key+'__{}_-removebg-preview.png'.format(i + 1)
+            filename = '../img/robot/' + key + '__{}_-removebg-preview.png'.format(i + 1)
             img = pygame.image.load(filename).convert()
             img.set_colorkey((0, 0, 0))
             robot_sprite[key][0].append(img)
@@ -51,8 +50,8 @@ class Robot(pygame.sprite.Sprite):
                 self.move_right()
             elif key_state[pygame.K_LEFT]:
                 self.move_left()
-            elif key_state[pygame.K_DOWN]:
-                self.bend()
+            # elif key_state[pygame.K_DOWN]:
+            # self.bend()
             elif key_state[pygame.K_UP]:
                 self.jump()
             elif key_state[pygame.K_SPACE]:
@@ -66,13 +65,14 @@ class Robot(pygame.sprite.Sprite):
             self.vel += self.acc
             self.pos += self.vel + 0.5 * self.acc
 
-            self.rect.midbottom = self.pos
             # check that the robot doesnt bass the screen boundaries
             if self.rect.bottom > HEIGHT - 65:
                 if self.current_pos != "Slide":
-                    self.rect.bottom = HEIGHT - 65
+                    self.rect.bottom = HEIGHT - 60
                 else:
                     self.rect.bottom = HEIGHT - 10
+            else:
+                self.rect.midbottom = self.pos
 
     def move_right(self):
         self.current_pos = "Run"
@@ -109,13 +109,19 @@ class Robot(pygame.sprite.Sprite):
     def bend(self):
         self.current_pos = "Slide"
         self.sprite_by_direction("Slide")
-        self.pos.y += 50
+        self.rect.bottom += 50
 
     def jump(self):
         self.current_pos = "Jump"
         self.sprite_by_direction("Jump")
         hits = pygame.sprite.spritecollide(self, self.game.platforms, False)
-        if hits:
+
+        counter = 0
+        for hit in hits:
+            if hit.rect.top == self.pos.y:
+                counter += 1
+
+        if counter > 0:
             self.vel.y = -20
 
     def shoot_pos(self):

@@ -45,3 +45,12 @@ def concat_char(text, char):
     else:
         text += char
     return text
+
+
+# get the largest number in a given list
+def get_max(num_list):
+    max_num = -1
+    for num in num_list:
+        if num > max_num:
+            max_num = num
+    return max_num
