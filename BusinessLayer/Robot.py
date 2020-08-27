@@ -1,7 +1,7 @@
 import pygame
 
 from BusinessLayer.Bullet import Bullet
-from BusinessLayer.Settings import BLACK, DIRECTIONS, PLAYER_ACC, PLAYER_GRAVITY, PLAYER_FRICTION
+from BusinessLayer.Settings import DIRECTIONS, PLAYER_ACC, PLAYER_GRAVITY, PLAYER_FRICTION, HEIGHT
 
 vec = pygame.math.Vector2
 
@@ -25,6 +25,7 @@ class Robot(pygame.sprite.Sprite):
         create_sprite()
         pygame.sprite.Sprite.__init__(self)
         self.game = board
+        self.current_pos = "Idle"
         self.image = robot_sprite["Idle"][0][0]
         self.rect = self.image.get_rect()
         self.rect.centerx = x
@@ -66,8 +67,15 @@ class Robot(pygame.sprite.Sprite):
             self.pos += self.vel + 0.5 * self.acc
 
             self.rect.midbottom = self.pos
+            # check that the robot doesnt bass the screen boundaries
+            if self.rect.bottom > HEIGHT - 65:
+                if self.current_pos != "Slide":
+                    self.rect.bottom = HEIGHT - 65
+                else:
+                    self.rect.bottom = HEIGHT - 10
 
     def move_right(self):
+        self.current_pos = "Run"
         self.image = robot_sprite["Run"][0][self.frame % robot_sprite["Run"][1]]
         self.last_direction = DIRECTIONS[1]
         if self.rect.centerx < 500:
@@ -76,6 +84,7 @@ class Robot(pygame.sprite.Sprite):
             self.pos.x += PLAYER_ACC * 15
 
     def move_left(self):
+        self.current_pos = "Run"
         img = robot_sprite["Run"][0][self.frame % robot_sprite["Run"][1]]
         flipped_img = pygame.transform.flip(img, True, False)
         self.image = flipped_img
@@ -94,19 +103,23 @@ class Robot(pygame.sprite.Sprite):
             self.image = pygame.transform.flip(img, True, False)
 
     def idle(self):
+        self.current_pos = "Idle"
         self.sprite_by_direction("Idle")
 
     def bend(self):
+        self.current_pos = "Slide"
         self.sprite_by_direction("Slide")
-        self.pos.y += 55
+        self.pos.y += 50
 
     def jump(self):
+        self.current_pos = "Jump"
         self.sprite_by_direction("Jump")
         hits = pygame.sprite.spritecollide(self, self.game.platforms, False)
         if hits:
             self.vel.y = -20
 
     def shoot_pos(self):
+        self.current_pos = "Shoot"
         self.sprite_by_direction("Shoot")
 
     def shoot(self):

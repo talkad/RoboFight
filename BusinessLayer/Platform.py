@@ -17,9 +17,9 @@ class Platform(pygame.sprite.Sprite):
     # as long as the limit hasn't reached
     def update(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT] and self.limit < 1850:
-            self.rect.x += PLAYER_ACC
-            self.limit += PLAYER_ACC
+        if keys[pygame.K_LEFT] and self.limit < 1000:
+            self.rect.x += PLAYER_ACC * 2
+            self.limit += PLAYER_ACC * 2
         if keys[pygame.K_RIGHT] and self.limit > -1000:
-            self.rect.x -= PLAYER_ACC
-            self.limit -= PLAYER_ACC
+            self.rect.x -= PLAYER_ACC * 2
+            self.limit -= PLAYER_ACC * 2

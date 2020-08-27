@@ -1,10 +1,8 @@
-BLACK = (0, 0, 0)
-
 # define display surface
 WIDTH, HEIGHT = 1000, 600
 
 # Player properties
-PLAYER_ACC = 2
+PLAYER_ACC = 2.5
 PLAYER_FRICTION = -0.12
 PLAYER_GRAVITY = 1.75
 

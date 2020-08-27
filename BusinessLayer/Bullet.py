@@ -1,8 +1,8 @@
 import pygame
 
-from BusinessLayer.Settings import BLACK, DIRECTIONS
+from BusinessLayer.Settings import DIRECTIONS
 
-SPEED = 4
+SPEED = 5
 bullet_sprite = {'Bullet': [[], 5], 'Muzzle': [[], 5]}
 
 
@@ -12,7 +12,7 @@ def create_sprite():
         for i in range(bullet_sprite[key][1]):
             filename = '../img/robot/Objects/' + key + '_00{}.png'.format(i)
             img = pygame.image.load(filename).convert()
-            img.set_colorkey(BLACK)
+            img.set_colorkey(pygame.Color('black'))
             img_bullet = pygame.transform.scale(img, (30, 30)).convert()
             bullet_sprite[key][0].append(img_bullet)
 
@@ -22,7 +22,7 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         create_sprite()
         self.image = bullet_sprite['Bullet'][0][0]
-        self.image.set_colorkey(BLACK)
+        self.image.set_colorkey(pygame.Color('black'))
         self.rect = self.image.get_rect()
         self.rect.bottom = y
         self.rect.centerx = x
