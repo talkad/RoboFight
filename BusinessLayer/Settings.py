@@ -9,9 +9,4 @@ PLAYER_GRAVITY = 1.75
 DIRECTIONS = ("left", "right")
 
 # Starting platforms
-PLATFORM_LIST = [(-2000, HEIGHT - 70, WIDTH * 4, 70),
-                 (50, HEIGHT - 200, 70, 200),
-                 (150, HEIGHT - 200, 70, 200),
-                 (900, HEIGHT - 200, 70, 200),
-                 (-900, HEIGHT - 200, 70, 200),
-                 ]
+PLATFORM_LIST = [(-2000, HEIGHT - 70, WIDTH * 4, 70)]

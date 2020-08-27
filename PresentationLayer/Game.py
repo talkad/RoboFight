@@ -43,18 +43,18 @@ class Game:
     def game_cycle(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT]:
-            if self.background_x > -1000:
+            if self.background_x > -1000 and self.player.rect.centerx == WIDTH / 2:
                 self.background_x -= PLAYER_ACC * 2
 
         if keys[pygame.K_LEFT]:
-            if self.background_x < 1000:
+            if self.background_x < 1000 and self.player.rect.centerx == WIDTH / 2:
                 self.background_x += PLAYER_ACC * 2
 
     # start a new game
     def new(self):
         self.all_sprites.add(self.player)
         for plat in PLATFORM_LIST:
-            p = Platform(*plat)
+            p = Platform(*plat, self)
             self.all_sprites.add(p)
             self.platforms.add(p)
         self.run()
@@ -82,6 +82,14 @@ class Game:
     def events(self):
         # Game Loop - events
         for event in pygame.event.get():
+            # check mouse clicked event for add platforms
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                p = Platform(x, y, 150, 20, self)
+                self.all_sprites.add(p)
+                self.platforms.add(p)
+                print(x)
+
             # add the key to the text
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and not self.text_mode:
@@ -117,7 +125,7 @@ class Game:
 
         # draw textbox on screen
         if self.text_mode:
-            draw_text(screen, "Chat: ", 30, 50, HEIGHT - 55, "white")
+            draw_text(screen, "Chat: ", 30, 50, HEIGHT - 55, "black")
 
         pygame.draw.rect(screen, pygame.Color('white'), text_box, 0)
         text_color = "black"
