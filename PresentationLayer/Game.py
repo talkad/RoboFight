@@ -1,12 +1,11 @@
 import os
-
 import pygame
 from pygame.locals import *
 from BusinessLayer.Platform import Platform
 from BusinessLayer.Robot import Robot
 from BusinessLayer.Bullet import Explosion
 from BusinessLayer.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST
-from PresentationLayer.Service import draw_text, concat_char, get_max
+from PresentationLayer.Service import draw_text, concat_char, get_max, draw_shield_bar, draw_msg_stack
 
 # setup pygame
 pygame.init()
@@ -23,15 +22,18 @@ background = pygame.image.load("../img/background.png").convert()
 explosion_sound = pygame.mixer.Sound("../sound/Explosion.wav")
 
 # generate the chat textbox
-text_box = pygame.Rect(100, HEIGHT - 50, 300, 30)
+text_box = pygame.Rect(50, HEIGHT - 45, 300, 25)
 
 
 class Game:
     def __init__(self):
         self.all_sprites = pygame.sprite.Group()
         self.text_mode = False
+        self. name = "Tal"
         self.text = ""
+        self.chat = []
         self.platforms = pygame.sprite.Group()
+        self.platforms_list = []
         self.bullets = pygame.sprite.Group()
         self.background_x = 0
         self.player = Robot(WIDTH / 2, HEIGHT - 70, self)
@@ -45,18 +47,25 @@ class Game:
         if keys[pygame.K_RIGHT]:
             if self.background_x > -1000 and self.player.rect.centerx == WIDTH / 2:
                 self.background_x -= PLAYER_ACC * 2
+                self.platforms_movement_mode(True)
+            else:
+                self.platforms_movement_mode(False)
 
         if keys[pygame.K_LEFT]:
             if self.background_x < 1000 and self.player.rect.centerx == WIDTH / 2:
                 self.background_x += PLAYER_ACC * 2
+                self.platforms_movement_mode(True)
+            else:
+                self.platforms_movement_mode(False)
 
     # start a new game
     def new(self):
         self.all_sprites.add(self.player)
         for plat in PLATFORM_LIST:
-            p = Platform(*plat, self)
+            p = Platform(*plat)
             self.all_sprites.add(p)
             self.platforms.add(p)
+            self.platforms_list.append(p)
         self.run()
 
     # Game  Main Loop
@@ -98,9 +107,10 @@ class Game:
             # check mouse clicked event for add platforms
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
-                p = Platform(x - 75, y, 150, 20, self)
+                p = Platform(x - 75, y, 150, 20)
                 self.all_sprites.add(p)
                 self.platforms.add(p)
+                self.platforms_list.append(p)
 
             # add the key to the text
             if event.type == pygame.KEYDOWN:
@@ -111,6 +121,8 @@ class Game:
                     self.text = concat_char(self.text, pygame.key.name(event.key))
                     if pygame.key.name(event.key) == 'return':
                         # sent message to opponent
+                        # add to chat
+                        self.add_msg(self.name, self.text)
                         self.text = ""
 
             # check for closing window
@@ -137,16 +149,29 @@ class Game:
 
         # draw textbox on screen
         if self.text_mode:
-            draw_text(screen, "Chat: ", 30, 50, HEIGHT - 55, "black")
+            draw_text(screen, "Chat: ", 20, 30, HEIGHT - 40, "white")
 
         pygame.draw.rect(screen, pygame.Color('white'), text_box, 0)
         text_color = "black"
-        if len(self.text) >= 30:
+        if len(self.text) >= 40:
             text_color = "red"
-        draw_text(screen, self.text, 20, 245, HEIGHT - 50, text_color)
+        draw_text(screen, self.text, 15, 200, HEIGHT - 40, text_color)
+
+        # draw chat
+        draw_msg_stack(screen, self.chat, 15, "black")
+
+        # draw shield
+        draw_shield_bar(screen, 5, 5, self.player.shield)
 
         # after drawing everything, flip the display
         pygame.display.flip()
+
+    def add_msg(self, name, msg):
+        self.chat.append(name+":   "+msg)
+
+    def platforms_movement_mode(self, mode):
+        for p in self.platforms_list:
+            p.change_mode(mode)
 
     def show_start_screen(self):
         # game splash/start screen

@@ -33,6 +33,7 @@ class Robot(pygame.sprite.Sprite):
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
         self.last_direction = DIRECTIONS[1]
+        self.shield = 100
         # for sprite functionality
         self.frame = 0
         self.last_update = pygame.time.get_ticks()
@@ -50,8 +51,10 @@ class Robot(pygame.sprite.Sprite):
                 self.move_right()
             elif key_state[pygame.K_LEFT]:
                 self.move_left()
+            # the bend-sprite isn't aligned like the other sprites,
+            # and thus makes some difficulties in the collision.
             # elif key_state[pygame.K_DOWN]:
-            # self.bend()
+                # self.bend()
             elif key_state[pygame.K_UP]:
                 self.jump()
             elif key_state[pygame.K_SPACE]:
