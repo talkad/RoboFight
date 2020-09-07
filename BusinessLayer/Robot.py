@@ -68,8 +68,9 @@ class Robot(pygame.sprite.Sprite):
             self.vel += self.acc
             self.pos += self.vel + 0.5 * self.acc
 
-            # check that the robot doesnt bass the screen boundaries
-            if self.rect.bottom > HEIGHT - 65:
+            # check that the robot doesnt pass the screen boundaries
+            if self.rect.bottom > HEIGHT - 60:
+                print(self.rect.bottom)
                 if self.current_pos != "Slide":
                     self.rect.bottom = HEIGHT - 60
                 else:
