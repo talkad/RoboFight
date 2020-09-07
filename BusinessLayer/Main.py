@@ -13,7 +13,10 @@ receive_thread.start()
 write_thread = threading.Thread(target=conn.write)
 write_thread.start()
 
-# run through terminal: python Main.py
+# thread that send over the robot coordinates
+
+# run through terminal: python Main.py / python -m BusinessLayer.Main
+
 # python is not really implemented multi-threading.
 # the IDE switching between the tasks so it just simulate multi-tasking.
 # because the client uses "two threads" - the first one is for listening and the other is for writing.
