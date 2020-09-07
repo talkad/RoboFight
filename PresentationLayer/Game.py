@@ -5,19 +5,16 @@ from BusinessLayer.Platform import Platform
 from BusinessLayer.Robot import Robot
 from BusinessLayer.Bullet import Explosion
 from BusinessLayer.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST
-from PresentationLayer.Service import draw_text, concat_char, get_max, draw_shield_bar, draw_msg_stack
+from PresentationLayer.Service import draw_text, concat_char, get_max, draw_shield_bar, draw_msg_stack, background, \
+    screen
 
 # setup pygame
-pygame.init()
-pygame.mixer.init()
 pygame.display.set_caption("RoboFight")
 clock = pygame.time.Clock()
 FPS = 60
 
 clock.tick(FPS)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-background = pygame.image.load("../img/background.png").convert()
 
 explosion_sound = pygame.mixer.Sound("../sound/Explosion.wav")
 
@@ -173,20 +170,11 @@ class Game:
         for p in self.platforms_list:
             p.change_mode(mode)
 
-    def show_start_screen(self):
-        # game splash/start screen
-        pass
-
-    def show_go_screen(self):
-        # game over/continue
-        pass
-
 
 # game loop
 board = Game()
 
 while board.running:
     board.new()
-    board.show_go_screen()
 
 pygame.quit()
