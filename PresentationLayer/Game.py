@@ -9,6 +9,8 @@ from PresentationLayer.Service import draw_text, concat_char, get_max, draw_shie
     screen
 
 # setup pygame
+pygame.mixer.init()
+
 pygame.display.set_caption("RoboFight")
 clock = pygame.time.Clock()
 FPS = 60
@@ -131,8 +133,8 @@ class Game:
     # draw all objects on the screen
     def draw(self):
         # draw background
-        board.game_cycle()
-        rel_x = board.background_x % background.get_rect().width
+        self.game_cycle()
+        rel_x = self.background_x % background.get_rect().width
         screen.blit(background, (rel_x - background.get_rect().width, 0))
         if rel_x < WIDTH:
             screen.blit(background, (rel_x, 0))
@@ -172,9 +174,10 @@ class Game:
 
 
 # game loop
-board = Game()
+def start_game():
+    board = Game()
 
-while board.running:
-    board.new()
+    while board.running:
+        board.new()
 
-pygame.quit()
+    pygame.quit()
