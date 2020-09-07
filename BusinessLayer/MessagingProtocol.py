@@ -13,6 +13,7 @@ def get_command(message):
     return ""
 
 
+# The situation when the opponent leave the match is unhandled
 class MessagingProtocol:
     def __init__(self):
         self.should_terminate = False

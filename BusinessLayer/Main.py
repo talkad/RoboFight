@@ -13,6 +13,11 @@ receive_thread.start()
 write_thread = threading.Thread(target=conn.write)
 write_thread.start()
 
+# join to the main thread
+write_thread.join()
+receive_thread.join()
+
+exit(0)
 # thread that send over the robot coordinates
 
 # run through terminal: python Main.py / python -m BusinessLayer.Main
