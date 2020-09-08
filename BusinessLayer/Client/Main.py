@@ -1,5 +1,5 @@
 import threading
-from BusinessLayer.ConnectionHandler import ConnectionHandler
+from BusinessLayer.Client.ConnectionHandler import ConnectionHandler
 
 # the sending and the receiving of messages occurred separately by two different threads
 
@@ -20,7 +20,7 @@ receive_thread.join()
 exit(0)
 # thread that send over the robot coordinates
 
-# run through terminal: python Main.py / python -m BusinessLayer.Main
+# run through terminal: python Main.py / python -m BusinessLayer.Client.Main
 
 # python is not really implemented multi-threading.
 # the IDE switching between the tasks so it just simulate multi-tasking.

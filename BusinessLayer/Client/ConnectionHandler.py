@@ -1,7 +1,6 @@
 import socket
-import sys
 
-from BusinessLayer.MessagingProtocol import MessagingProtocol
+from BusinessLayer.Client.MessagingProtocol import MessagingProtocol
 
 
 # currently it is just for chat
