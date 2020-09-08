@@ -1,9 +1,15 @@
 import pygame
-
+import os.path
 from BusinessLayer.Game.Settings import WIDTH, HEIGHT
 
+# setup pygame
+pygame.init()
+pygame.mixer.init()
+
+filepath = os.path.dirname(__file__)
+
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-background = pygame.image.load("../img/background.png").convert()
+background = pygame.image.load(os.path.join(filepath, "../img/background.png")).convert()
 font_name = pygame.font.match_font('arial')
 
 

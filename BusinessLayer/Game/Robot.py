@@ -1,9 +1,13 @@
+import os
+
 import pygame
 
 from BusinessLayer.Game.Bullet import Bullet
 from BusinessLayer.Game.Settings import DIRECTIONS, PLAYER_ACC, PLAYER_GRAVITY, PLAYER_FRICTION, HEIGHT
 
 vec = pygame.math.Vector2
+
+filepath = os.path.dirname(__file__)
 
 robot_sprite = {'Idle': [[], 10], 'Jump': [[], 10], 'Run': [[], 8],
                 'Shoot': [[], 4], 'Slide': [[], 10], 'Dead': [[], 10]}
@@ -13,8 +17,8 @@ robot_sprite = {'Idle': [[], 10], 'Jump': [[], 10], 'Run': [[], 8],
 def create_sprite():
     for key in robot_sprite:
         for i in range(robot_sprite[key][1]):
-            filename = '../img/robot/' + key + '__{}_-removebg-preview.png'.format(i + 1)
-            img = pygame.image.load(filename).convert()
+            filename = '../../img/robot/' + key + '__{}_-removebg-preview.png'.format(i + 1)
+            img = pygame.image.load(os.path.join(filepath, filename)).convert()
             img.set_colorkey((0, 0, 0))
             robot_sprite[key][0].append(img)
 

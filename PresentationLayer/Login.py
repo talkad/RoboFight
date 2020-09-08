@@ -7,11 +7,12 @@ from PresentationLayer.Game import start_game
 from PresentationLayer.Observer import Observer
 from PresentationLayer.Service import screen, background, concat_char, draw_text
 
-# setup pygame
-pygame.init()
-
 # generate the chat textbox
 name_box = pygame.Rect(150, 370, 600, 40)
+
+# initialize connection with the server
+# the presentation layer knows the business logic
+connection_starter = StartConnection()
 
 
 class Login(Observer):
@@ -19,6 +20,7 @@ class Login(Observer):
         self.text = ""
         self.running = True
         self.error_msg = ""
+        self.text_display = True
 
     # Login main loop
     def run(self):
@@ -33,7 +35,7 @@ class Login(Observer):
         for event in pygame.event.get():
 
             # add the key to the text
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and self.text_display:
                 self.text = concat_char(self.text, pygame.key.name(event.key))
                 if pygame.key.name(event.key) == 'return':
                     self.handle_return()
@@ -65,28 +67,34 @@ class Login(Observer):
     # otherwise, a new game will start
     def handle_return(self):
         # send nickname for connection
-        self.error_msg = "error"
-        # if message is ok start board game
-        if self.error_msg == 'OK':
-            self.running = False
-            start_game()
-        # else- try again
-        else:
-            self.text = ""
+        connection_starter.conn.write('CONNECT', self.text)
+        self.text = ""
 
-    def update(self, subject):
-        pass
+    def start_match(self):
+        self.running = False
+        start_game()
+
+    def observer_update(self, subject):
+        msg = subject.received_msg
+        if 'Waiting for an opponent...' in msg:
+            self.text_display = False
+        if 'OPPONENT:' in msg:
+            print("match is about to start")
+            self.start_match()
+        else:
+            self.error_msg = msg
 
 
 login = Login()
-connection_starter = StartConnection()
-
+connection_starter.conn.msg_protocol.data.attach_observer(login)
 connection_thread = threading.Thread(target=connection_starter.connect)
 
 connection_thread.start()  # start connection with the remote server
-# add observer
 login.run()  # start display the game
 
 # connection_thread.join()
 
-exit(0)
+# exit(0)
+
+
+# run through terminal:  python -m PresentationLayer.Login

@@ -1,6 +1,10 @@
+import os
+
 import pygame
 
 from BusinessLayer.Game.Settings import DIRECTIONS
+
+filepath = os.path.dirname(__file__)
 
 SPEED = 5
 bullet_sprite = {'Bullet': [[], 5], 'Muzzle': [[], 5]}
@@ -10,8 +14,8 @@ bullet_sprite = {'Bullet': [[], 5], 'Muzzle': [[], 5]}
 def create_sprite():
     for key in bullet_sprite:
         for i in range(bullet_sprite[key][1]):
-            filename = '../img/robot/Objects/' + key + '_00{}.png'.format(i)
-            img = pygame.image.load(filename).convert()
+            filename = '../.../img/robot/Objects/' + key + '_00{}.png'.format(i)
+            img = pygame.image.load(os.path.join(filepath, filename)).convert()
             img.set_colorkey(pygame.Color('black'))
             img_bullet = pygame.transform.scale(img, (30, 30)).convert()
             bullet_sprite[key][0].append(img_bullet)

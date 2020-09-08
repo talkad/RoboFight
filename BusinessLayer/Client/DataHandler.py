@@ -23,4 +23,4 @@ class DataHandler:
     def notify(self):
         print("notifying observers...")
         for observer in self.observers:
-            observer.update(self)
+            observer.observer_update(self)

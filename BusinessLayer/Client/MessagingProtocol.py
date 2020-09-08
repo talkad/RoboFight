@@ -20,6 +20,7 @@ class MessagingProtocol:
         self.data = DataHandler()
 
     def process(self, message):
+        print(message)
         command = get_command(message)
 
         # 1. receive message from server and display it on screen - observer
@@ -30,7 +31,10 @@ class MessagingProtocol:
         elif command == 'SEND':
             self.receive_msg(get_content(message))
         # 2. moves the robot of the opponent
-        pass
+
+        # notify the observers when received a message from the server
+        self.data.received_msg = message[: -1]  # ignore the newline character
+        self.data.notify()
 
     def terminate(self):
         self.should_terminate = True

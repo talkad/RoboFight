@@ -1,24 +1,27 @@
 import threading
 from BusinessLayer.Client.ConnectionHandler import ConnectionHandler
 
+host = '127.0.0.1'  # localhost
+
 
 class StartConnection:
+    def __init__(self):
+        self.conn = ConnectionHandler(host, 8080)
 
     def connect(self):
         # the sending and the receiving of messages occurred separately by two different threads
 
-        host = '127.0.0.1'  # localhost
-        conn = ConnectionHandler(host, 8080)
-        conn.connect()
+        self.conn.connect()
 
-        receive_thread = threading.Thread(target=conn.receive)
+        receive_thread = threading.Thread(target=self.conn.receive)
         receive_thread.start()
 
-        write_thread = threading.Thread(target=conn.write)
-        write_thread.start()
+        # the thread responsible for writing currently is the thread runs the GUI code
+        # write_thread = threading.Thread(target=conn.write)
+        # write_thread.start()
 
         # join to the main thread
-        write_thread.join()
+        # write_thread.join()
         receive_thread.join()
 
         exit(0)

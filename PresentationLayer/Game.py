@@ -5,11 +5,10 @@ from BusinessLayer.Game.Platform import Platform
 from BusinessLayer.Game.Robot import Robot
 from BusinessLayer.Game.Bullet import Explosion
 from BusinessLayer.Game.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST
+from PresentationLayer.Observer import Observer
 from PresentationLayer.Service import draw_text, concat_char, get_max, draw_shield_bar, draw_msg_stack, background, \
     screen
 
-# setup pygame
-pygame.mixer.init()
 
 pygame.display.set_caption("RoboFight")
 clock = pygame.time.Clock()
@@ -18,13 +17,14 @@ FPS = 60
 clock.tick(FPS)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-explosion_sound = pygame.mixer.Sound("../sound/Explosion.wav")
+filepath = os.path.dirname(__file__)
+explosion_sound = pygame.mixer.Sound(os.path.join(filepath, "../sound/Explosion.wav"))
 
 # generate the chat textbox
 text_box = pygame.Rect(50, HEIGHT - 45, 300, 25)
 
 
-class Game:
+class Game(Observer):
     def __init__(self):
         self.all_sprites = pygame.sprite.Group()
         self.text_mode = False
@@ -171,6 +171,9 @@ class Game:
     def platforms_movement_mode(self, mode):
         for p in self.platforms_list:
             p.change_mode(mode)
+
+    def observer_update(self, subject):
+        pass
 
 
 # game loop

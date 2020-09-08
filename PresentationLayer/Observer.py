@@ -5,6 +5,6 @@ from abc import ABC, abstractmethod
 class Observer(ABC):
 
     @abstractmethod
-    def update(self, subject):
+    def observer_update(self, subject):
         # receive update from subject
         pass
