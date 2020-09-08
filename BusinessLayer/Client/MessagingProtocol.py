@@ -1,4 +1,4 @@
-from numpy.core.defchararray import rindex
+from BusinessLayer.Client.DataHandler import DataHandler
 
 
 def get_content(message):
@@ -17,8 +17,7 @@ def get_command(message):
 class MessagingProtocol:
     def __init__(self):
         self.should_terminate = False
-        self.opponent_id = 0
-        self.opponent_name = ""
+        self.data = DataHandler()
 
     def process(self, message):
         command = get_command(message)
@@ -40,8 +39,9 @@ class MessagingProtocol:
         return self.should_terminate
 
     def update_opponent(self, content):
-        self.opponent_id = content[: content.find(' ')]
-        self.opponent_name = content[content.find(' ') + 1:-1]
+        opponent_id = content[: content.find(' ')]
+        opponent_name = content[content.find(' ') + 1:-1]
+        self.data.update_opponent_details(opponent_id, opponent_name)
 
     def receive_msg(self, message):
-        print('{0}: {1}'.format(self.opponent_name, message))
+        print('{0}: {1}'.format(self.data.opponent_name, message))

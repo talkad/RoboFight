@@ -1,6 +1,10 @@
+import threading
+
 import pygame
 
+from BusinessLayer.Client.StartConnection import StartConnection
 from PresentationLayer.Game import start_game
+from PresentationLayer.Observer import Observer
 from PresentationLayer.Service import screen, background, concat_char, draw_text
 
 # setup pygame
@@ -10,7 +14,7 @@ pygame.init()
 name_box = pygame.Rect(150, 370, 600, 40)
 
 
-class Login:
+class Login(Observer):
     def __init__(self):
         self.text = ""
         self.running = True
@@ -21,11 +25,7 @@ class Login:
         self.running = True
         while self.running:
             self.events()
-            self.update()
             self.draw()
-
-    def update(self):
-        pass
 
     # handle key events
     def events(self):
@@ -74,6 +74,19 @@ class Login:
         else:
             self.text = ""
 
+    def update(self, subject):
+        pass
+
 
 login = Login()
-login.run()
+connection_starter = StartConnection()
+
+connection_thread = threading.Thread(target=connection_starter.connect)
+
+connection_thread.start()  # start connection with the remote server
+# add observer
+login.run()  # start display the game
+
+# connection_thread.join()
+
+exit(0)
