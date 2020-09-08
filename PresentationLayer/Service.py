@@ -1,6 +1,6 @@
 import pygame
 
-from BusinessLayer.Settings import WIDTH, HEIGHT
+from BusinessLayer.Game.Settings import WIDTH, HEIGHT
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 background = pygame.image.load("../img/background.png").convert()

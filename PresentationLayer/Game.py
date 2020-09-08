@@ -1,10 +1,10 @@
 import os
 import pygame
 from pygame.locals import *
-from BusinessLayer.Platform import Platform
-from BusinessLayer.Robot import Robot
-from BusinessLayer.Bullet import Explosion
-from BusinessLayer.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST
+from BusinessLayer.Game.Platform import Platform
+from BusinessLayer.Game.Robot import Robot
+from BusinessLayer.Game.Bullet import Explosion
+from BusinessLayer.Game.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST
 from PresentationLayer.Service import draw_text, concat_char, get_max, draw_shield_bar, draw_msg_stack, background, \
     screen
 

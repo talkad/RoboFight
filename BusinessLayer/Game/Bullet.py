@@ -1,6 +1,6 @@
 import pygame
 
-from BusinessLayer.Settings import DIRECTIONS
+from BusinessLayer.Game.Settings import DIRECTIONS
 
 SPEED = 5
 bullet_sprite = {'Bullet': [[], 5], 'Muzzle': [[], 5]}

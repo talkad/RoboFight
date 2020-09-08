@@ -1,7 +1,7 @@
 import pygame
 
-from BusinessLayer.Bullet import Bullet
-from BusinessLayer.Settings import DIRECTIONS, PLAYER_ACC, PLAYER_GRAVITY, PLAYER_FRICTION, HEIGHT
+from BusinessLayer.Game.Bullet import Bullet
+from BusinessLayer.Game.Settings import DIRECTIONS, PLAYER_ACC, PLAYER_GRAVITY, PLAYER_FRICTION, HEIGHT
 
 vec = pygame.math.Vector2
 

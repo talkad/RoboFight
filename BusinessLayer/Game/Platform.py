@@ -1,6 +1,6 @@
 import pygame
 
-from BusinessLayer.Settings import PLAYER_ACC
+from BusinessLayer.Game.Settings import PLAYER_ACC
 
 
 class Platform(pygame.sprite.Sprite):
