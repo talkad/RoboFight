@@ -1,10 +1,16 @@
 import pygame
 import os.path
+
+from BusinessLayer.Client.StartConnection import StartConnection
 from BusinessLayer.Game.Settings import WIDTH, HEIGHT
 
 # setup pygame
 pygame.init()
 pygame.mixer.init()
+
+# initialize connection with the server
+# the presentation layer knows the business logic
+connection_starter = StartConnection()
 
 filepath = os.path.dirname(__file__)
 

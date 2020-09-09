@@ -2,17 +2,12 @@ import threading
 
 import pygame
 
-from BusinessLayer.Client.StartConnection import StartConnection
-from PresentationLayer.Game import start_game
+from PresentationLayer.Game import Game
 from PresentationLayer.Observer import Observer
-from PresentationLayer.Service import screen, background, concat_char, draw_text
+from PresentationLayer.Service import screen, background, concat_char, draw_text, connection_starter
 
 # generate the chat textbox
 name_box = pygame.Rect(150, 370, 600, 40)
-
-# initialize connection with the server
-# the presentation layer knows the business logic
-connection_starter = StartConnection()
 
 
 class Login(Observer):
@@ -21,28 +16,42 @@ class Login(Observer):
         self.running = True
         self.error_msg = ""
         self.text_display = True
+        self.is_login = True
+        self.board = Game()
+        self.board.new()  # initialize board
 
-    # Login main loop
+    # Main loop
     def run(self):
         self.running = True
-        while self.running:
+        while self.running or self.board.running:
             self.events()
-            self.draw()
+
+            if self.is_login:
+                self.draw()
+            else:
+                self.board.draw()
+                self.board.update()
+                self.board.draw()
 
     # handle key events
     def events(self):
         # Game Loop - events
         for event in pygame.event.get():
+            if self.is_login:
+                self.login_events(event)
+            else:
+                self.board.game_events(event)
 
-            # add the key to the text
-            if event.type == pygame.KEYDOWN and self.text_display:
-                self.text = concat_char(self.text, pygame.key.name(event.key))
-                if pygame.key.name(event.key) == 'return':
-                    self.handle_return()
+    def login_events(self, event):
+        # add the key to the text
+        if event.type == pygame.KEYDOWN and self.text_display:
+            self.text = concat_char(self.text, pygame.key.name(event.key))
+            if pygame.key.name(event.key) == 'return':
+                self.handle_return()
 
-            # check for closing window
-            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-                self.running = False
+        # check for closing window
+        if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            self.running = False
 
     # draw all objects on the screen
     def draw(self):
@@ -71,15 +80,17 @@ class Login(Observer):
         self.text = ""
 
     def start_match(self):
-        self.running = False
-        start_game()
+        self.is_login = False
+        self.board.new()
 
     def observer_update(self, subject):
         msg = subject.received_msg
         if 'Waiting for an opponent...' in msg:
             self.text_display = False
         if 'OPPONENT:' in msg:
-            print("match is about to start")
+            # print("match is about to start")
+            connection_starter.conn.msg_protocol.data.detach_observer(self)
+            connection_starter.conn.msg_protocol.data.attach_observer(self.board)
             self.start_match()
         else:
             self.error_msg = msg
@@ -92,9 +103,7 @@ connection_thread = threading.Thread(target=connection_starter.connect)
 connection_thread.start()  # start connection with the remote server
 login.run()  # start display the game
 
-# connection_thread.join()
-
-# exit(0)
+connection_thread.join()
 
 
 # run through terminal:  python -m PresentationLayer.Login

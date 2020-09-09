@@ -1,4 +1,6 @@
 import os
+import sys
+
 import pygame
 from pygame.locals import *
 from BusinessLayer.Game.Platform import Platform
@@ -9,6 +11,7 @@ from PresentationLayer.Observer import Observer
 from PresentationLayer.Service import draw_text, concat_char, get_max, draw_shield_bar, draw_msg_stack, background, \
     screen
 
+pygame.init()
 
 pygame.display.set_caption("RoboFight")
 clock = pygame.time.Clock()
@@ -65,15 +68,6 @@ class Game(Observer):
             self.all_sprites.add(p)
             self.platforms.add(p)
             self.platforms_list.append(p)
-        self.run()
-
-    # Game  Main Loop
-    def run(self):
-        self.running = True
-        while self.running:
-            self.events()
-            self.update()
-            self.draw()
 
     def update(self):
         # Game Loop - Update
@@ -99,36 +93,35 @@ class Game(Observer):
             explosion = Explosion(bullet.rect.center)
             self.all_sprites.add(explosion)
 
-    # handle key events
-    def events(self):
-        # Game Loop - events
-        for event in pygame.event.get():
-            # check mouse clicked event for add platforms
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                p = Platform(x - 75, y, 150, 20)
-                self.all_sprites.add(p)
-                self.platforms.add(p)
-                self.platforms_list.append(p)
+    def game_events(self, event):
+        # check mouse clicked event for add platforms
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = pygame.mouse.get_pos()
+            p = Platform(x - 75, y, 150, 20)
+            self.all_sprites.add(p)
+            self.platforms.add(p)
+            self.platforms_list.append(p)
 
-            # add the key to the text
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not self.text_mode:
-                    self.player.shoot()
-                    explosion_sound.play()
-                elif self.text_mode:
-                    self.text = concat_char(self.text, pygame.key.name(event.key))
-                    if pygame.key.name(event.key) == 'return':
-                        # sent message to opponent
-                        # add to chat
-                        self.add_msg(self.name, self.text)
-                        self.text = ""
+        # add the key to the text
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE and not self.text_mode:
+                self.player.shoot()
+                explosion_sound.play()
+            elif self.text_mode:
+                self.text = concat_char(self.text, pygame.key.name(event.key))
+                if pygame.key.name(event.key) == 'return':
+                    # sent message to opponent
+                    # add to chat
+                    self.add_msg(self.name, self.text)
+                    self.text = ""
 
-            # check for closing window
-            if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == pygame.K_ESCAPE):
-                self.running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
-                self.text_mode = not self.text_mode
+        # check for closing window
+        if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == pygame.K_ESCAPE):
+            self.running = False
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+            self.text_mode = not self.text_mode
 
     # draw all objects on the screen
     def draw(self):
@@ -173,14 +166,4 @@ class Game(Observer):
             p.change_mode(mode)
 
     def observer_update(self, subject):
-        pass
-
-
-# game loop
-def start_game():
-    board = Game()
-
-    while board.running:
-        board.new()
-
-    pygame.quit()
+        return

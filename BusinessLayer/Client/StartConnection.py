@@ -13,8 +13,10 @@ class StartConnection:
 
         self.conn.connect()
 
-        receive_thread = threading.Thread(target=self.conn.receive)
-        receive_thread.start()
+        self.conn.receive()
+
+        # receive_thread = threading.Thread(target=self.conn.receive)
+        # receive_thread.start()
 
         # the thread responsible for writing currently is the thread runs the GUI code
         # write_thread = threading.Thread(target=conn.write)
@@ -22,9 +24,7 @@ class StartConnection:
 
         # join to the main thread
         # write_thread.join()
-        receive_thread.join()
-
-        exit(0)
+        # receive_thread.join()
 
 
 # thread that send over the robot coordinates

@@ -14,7 +14,7 @@ bullet_sprite = {'Bullet': [[], 5], 'Muzzle': [[], 5]}
 def create_sprite():
     for key in bullet_sprite:
         for i in range(bullet_sprite[key][1]):
-            filename = '../.../img/robot/Objects/' + key + '_00{}.png'.format(i)
+            filename = '../../img/robot/Objects/' + key + '_00{}.png'.format(i)
             img = pygame.image.load(os.path.join(filepath, filename)).convert()
             img.set_colorkey(pygame.Color('black'))
             img_bullet = pygame.transform.scale(img, (30, 30)).convert()
