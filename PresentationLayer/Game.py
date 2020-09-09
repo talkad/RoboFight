@@ -3,13 +3,15 @@ import sys
 
 import pygame
 from pygame.locals import *
+
+from BusinessLayer.Client.MessagingProtocol import get_content
 from BusinessLayer.Game.Platform import Platform
 from BusinessLayer.Game.Robot import Robot
 from BusinessLayer.Game.Bullet import Explosion
 from BusinessLayer.Game.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST
 from PresentationLayer.Observer import Observer
 from PresentationLayer.Service import draw_text, concat_char, get_max, draw_shield_bar, draw_msg_stack, background, \
-    screen
+    screen, connection_starter
 
 pygame.init()
 
@@ -31,7 +33,7 @@ class Game(Observer):
     def __init__(self):
         self.all_sprites = pygame.sprite.Group()
         self.text_mode = False
-        self. name = "Tal"
+        self.name = ""
         self.text = ""
         self.chat = []
         self.platforms = pygame.sprite.Group()
@@ -94,13 +96,15 @@ class Game(Observer):
             self.all_sprites.add(explosion)
 
     def game_events(self, event):
+        # too many tasks for a single thread- i would ignore this functionality for now
+
         # check mouse clicked event for add platforms
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = pygame.mouse.get_pos()
-            p = Platform(x - 75, y, 150, 20)
-            self.all_sprites.add(p)
-            self.platforms.add(p)
-            self.platforms_list.append(p)
+        # if event.type == pygame.MOUSEBUTTONDOWN:
+        #     x, y = pygame.mouse.get_pos()
+        #     p = Platform(x - 75, y, 150, 20)
+        #     self.all_sprites.add(p)
+        #     self.platforms.add(p)
+        #     self.platforms_list.append(p)
 
         # add the key to the text
         if event.type == pygame.KEYDOWN:
@@ -111,6 +115,7 @@ class Game(Observer):
                 self.text = concat_char(self.text, pygame.key.name(event.key))
                 if pygame.key.name(event.key) == 'return':
                     # sent message to opponent
+                    connection_starter.conn.write('SEND', self.text)
                     # add to chat
                     self.add_msg(self.name, self.text)
                     self.text = ""
@@ -159,11 +164,14 @@ class Game(Observer):
         pygame.display.flip()
 
     def add_msg(self, name, msg):
-        self.chat.append(name+":   "+msg)
+        self.chat.append(name + ":   " + msg)
 
     def platforms_movement_mode(self, mode):
         for p in self.platforms_list:
             p.change_mode(mode)
 
     def observer_update(self, subject):
-        return
+        if ':' in subject.received_msg:
+            content = get_content(subject.received_msg)
+            print("aaaaaaaaa {}".format(content))
+            self.add_msg(subject.opponent_name, content)

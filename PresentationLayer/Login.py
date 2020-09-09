@@ -77,6 +77,7 @@ class Login(Observer):
     def handle_return(self):
         # send nickname for connection
         connection_starter.conn.write('CONNECT', self.text)
+        self.board.name = self.text
         self.text = ""
 
     def start_match(self):
