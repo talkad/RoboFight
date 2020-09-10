@@ -14,7 +14,7 @@ filepath = os.path.dirname(__file__)
 robot_sprite = {'Idle': [[], 10], 'Jump': [[], 10], 'Run': [[], 8],
                 'Shoot': [[], 4], 'Slide': [[], 10], 'Dead': [[], 10]}
 
-send_location_freq = 250
+send_location_freq = 75
 
 
 # generate a map structure that contains all the states the robot can be during the game
@@ -182,11 +182,8 @@ class opponent_robot(Robot):
 
     # changing the state of the sprite
     def change_state(self, x_pos, y_pos, current_pos, direction):
-        pass
-        # x_offset = x_pos + self.game.player.game.background_x
-        # print(f'{x_pos} {y_pos} {current_pos} {direction}')
-        # self.rect.centerx = x_offset
-        # self.rect.bottom = y_pos
-        # self.pos = vec(x_offset, y_pos)
-        # self.last_direction = direction
-        # self.current_pos = current_pos
+        self.rect.centerx = x_pos
+        self.rect.bottom = y_pos
+        self.pos = vec(x_pos, y_pos)
+        self.last_direction = direction
+        self.current_pos = current_pos

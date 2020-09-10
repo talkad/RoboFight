@@ -179,6 +179,7 @@ class Game(Observer):
             self.add_msg(subject.opponent_name, content)
         elif 'LOCATION:' in msg:
             match = re.match(r'\(([-/+]?\d+\.\d+),([-/+]?\d+\.\d+)\):(\S+):(\S+)', content)
-            self.opponent.change_state(match.group(1), match.group(2), match.group(3), match.group(4))
+            x_pos = float(match.group(1)) + self.background_x
+            self.opponent.change_state(x_pos, float(match.group(2)), match.group(3), match.group(4))
 
 # python -m PresentationLayer.Login

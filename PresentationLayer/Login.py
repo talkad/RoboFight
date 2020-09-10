@@ -1,4 +1,3 @@
-import re
 import threading
 
 import pygame
@@ -110,4 +109,3 @@ connection_thread.join()
 
 
 # run through terminal:  python -m PresentationLayer.Login
-
