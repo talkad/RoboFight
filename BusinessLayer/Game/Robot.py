@@ -1,9 +1,11 @@
 import os
+from abc import abstractmethod
 
 import pygame
 
 from BusinessLayer.Game.Bullet import Bullet
 from BusinessLayer.Game.Settings import DIRECTIONS, PLAYER_ACC, PLAYER_GRAVITY, PLAYER_FRICTION, HEIGHT
+from PresentationLayer.Service import connection_starter
 
 vec = pygame.math.Vector2
 
@@ -11,6 +13,8 @@ filepath = os.path.dirname(__file__)
 
 robot_sprite = {'Idle': [[], 10], 'Jump': [[], 10], 'Run': [[], 8],
                 'Shoot': [[], 4], 'Slide': [[], 10], 'Dead': [[], 10]}
+
+send_location_freq = 250
 
 
 # generate a map structure that contains all the states the robot can be during the game
@@ -38,15 +42,43 @@ class Robot(pygame.sprite.Sprite):
         self.acc = vec(0, 0)
         self.last_direction = DIRECTIONS[1]
         self.shield = 100
+        self.name = ""
         # for sprite functionality
         self.frame = 0
         self.last_update = pygame.time.get_ticks()
+        self.last_location_sent = pygame.time.get_ticks()
         self.frame_rate = 55
 
+    @abstractmethod
+    def update(self):
+        pass
+
+    # update the current frame of the sprite according the last direction the robot moved
+    def sprite_by_direction(self, sprite):
+        img = robot_sprite[sprite][0][self.frame % robot_sprite[sprite][1]]
+        if self.last_direction == DIRECTIONS[1]:
+            self.image = img
+        else:
+            self.image = pygame.transform.flip(img, True, False)
+
+
+class player_robot(Robot):
     # take care of key pressed event
     def update(self):
         self.acc = vec(0, PLAYER_GRAVITY)
         now = pygame.time.get_ticks()
+
+        # send the robot location to opponent
+        if now - self.last_location_sent > send_location_freq:
+            self.last_location_sent = now
+            connection_starter.conn.write('LOCATION', '{}:({},{}):{}:{}'.format(
+                connection_starter.conn.msg_protocol.data.opponent_id,
+                self.pos.x - self.game.background_x,
+                self.pos.y,
+                self.current_pos,
+                self.last_direction))
+
+        # change current state of the robot
         if now - self.last_update > self.frame_rate:
             self.last_update = now
             self.frame += 1
@@ -101,14 +133,6 @@ class Robot(pygame.sprite.Sprite):
         elif self.rect.centerx > 55 and self.game.background_x >= 1000:
             self.pos.x -= PLAYER_ACC * 15
 
-    # update the current frame of the sprite according the last direction the robot moved
-    def sprite_by_direction(self, sprite):
-        img = robot_sprite[sprite][0][self.frame % robot_sprite[sprite][1]]
-        if self.last_direction == DIRECTIONS[1]:
-            self.image = img
-        else:
-            self.image = pygame.transform.flip(img, True, False)
-
     def idle(self):
         self.current_pos = "Idle"
         self.sprite_by_direction("Idle")
@@ -142,3 +166,27 @@ class Robot(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx + x_offset, self.rect.centery, self.last_direction)
         self.game.all_sprites.add(bullet)
         self.game.bullets.add(bullet)
+
+
+class opponent_robot(Robot):
+
+    # take care of the changes of the frames
+    def update(self):
+        now = pygame.time.get_ticks()
+
+        # change current state of the robot
+        if now - self.last_update > self.frame_rate:
+            self.last_update = now
+            self.frame += 1
+            self.sprite_by_direction(self.current_pos)
+
+    # changing the state of the sprite
+    def change_state(self, x_pos, y_pos, current_pos, direction):
+        pass
+        # x_offset = x_pos + self.game.player.game.background_x
+        # print(f'{x_pos} {y_pos} {current_pos} {direction}')
+        # self.rect.centerx = x_offset
+        # self.rect.bottom = y_pos
+        # self.pos = vec(x_offset, y_pos)
+        # self.last_direction = direction
+        # self.current_pos = current_pos

@@ -1,12 +1,12 @@
 import os
 import sys
-
+import re
 import pygame
 from pygame.locals import *
 
 from BusinessLayer.Client.MessagingProtocol import get_content
 from BusinessLayer.Game.Platform import Platform
-from BusinessLayer.Game.Robot import Robot
+from BusinessLayer.Game.Robot import player_robot, opponent_robot
 from BusinessLayer.Game.Bullet import Explosion
 from BusinessLayer.Game.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST
 from PresentationLayer.Observer import Observer
@@ -33,14 +33,14 @@ class Game(Observer):
     def __init__(self):
         self.all_sprites = pygame.sprite.Group()
         self.text_mode = False
-        self.name = ""
         self.text = ""
         self.chat = []
         self.platforms = pygame.sprite.Group()
         self.platforms_list = []
         self.bullets = pygame.sprite.Group()
         self.background_x = 0
-        self.player = Robot(WIDTH / 2, HEIGHT - 70, self)
+        self.player = player_robot(WIDTH / 2, HEIGHT - 70, self)
+        self.opponent = opponent_robot(WIDTH / 2, HEIGHT - 70, self)
         self.running = True
 
     # every cycle of the game, one of two things could happen:
@@ -65,6 +65,7 @@ class Game(Observer):
     # start a new game
     def new(self):
         self.all_sprites.add(self.player)
+        self.all_sprites.add(self.opponent)
         for plat in PLATFORM_LIST:
             p = Platform(*plat)
             self.all_sprites.add(p)
@@ -117,7 +118,7 @@ class Game(Observer):
                     # sent message to opponent
                     connection_starter.conn.write('SEND', self.text)
                     # add to chat
-                    self.add_msg(self.name, self.text)
+                    self.add_msg(self.player.name, self.text)
                     self.text = ""
 
         # check for closing window
@@ -140,7 +141,7 @@ class Game(Observer):
         self.all_sprites.draw(screen)
 
         # draw all text on screen
-        draw_text(screen, "position: ({:f}, {:f})".format(self.player.pos.x + (self.background_x * -1),
+        draw_text(screen, "position: ({:f}, {:f})".format(self.player.pos.x - self.background_x,
                                                           self.player.pos.y),
                   20, WIDTH / 2, 10, 'black')
 
@@ -157,8 +158,9 @@ class Game(Observer):
         # draw chat
         draw_msg_stack(screen, self.chat, 15, "black")
 
-        # draw shield
-        draw_shield_bar(screen, 5, 5, self.player.shield)
+        # draw shields
+        draw_shield_bar(screen, 5, 5, self.player.shield, 'green')
+        draw_shield_bar(screen, WIDTH - 155, 5, self.opponent.shield, 'red')
 
         # after drawing everything, flip the display
         pygame.display.flip()
@@ -171,7 +173,12 @@ class Game(Observer):
             p.change_mode(mode)
 
     def observer_update(self, subject):
-        if ':' in subject.received_msg:
-            content = get_content(subject.received_msg)
-            print("aaaaaaaaa {}".format(content))
+        msg = subject.received_msg
+        content = get_content(msg)
+        if 'SEND:' in msg:
             self.add_msg(subject.opponent_name, content)
+        elif 'LOCATION:' in msg:
+            match = re.match(r'\(([-/+]?\d+\.\d+),([-/+]?\d+\.\d+)\):(\S+):(\S+)', content)
+            self.opponent.change_state(match.group(1), match.group(2), match.group(3), match.group(4))
+
+# python -m PresentationLayer.Login

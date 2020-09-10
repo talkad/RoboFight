@@ -21,6 +21,5 @@ class DataHandler:
 
     # trigger an update in each subscriber
     def notify(self):
-        print("notifying observers...")
         for observer in self.observers:
             observer.observer_update(self)

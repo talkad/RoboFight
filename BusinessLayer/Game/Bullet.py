@@ -6,7 +6,7 @@ from BusinessLayer.Game.Settings import DIRECTIONS
 
 filepath = os.path.dirname(__file__)
 
-SPEED = 5
+SPEED = 10
 bullet_sprite = {'Bullet': [[], 5], 'Muzzle': [[], 5]}
 
 

@@ -90,7 +90,7 @@ def get_max(num_list):
     return max_num
 
 
-def draw_shield_bar(surf, x, y, pct):
+def draw_shield_bar(surf, x, y, pct, color):
     if pct < 0:
         pct = 0
     BAR_LENGTH = 150
@@ -98,5 +98,5 @@ def draw_shield_bar(surf, x, y, pct):
     fill = (pct / 100) * BAR_LENGTH
     outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
-    pygame.draw.rect(surf, pygame.Color('green'), fill_rect)
+    pygame.draw.rect(surf, pygame.Color(color), fill_rect)
     pygame.draw.rect(surf, pygame.Color('white'), outline_rect, 2)

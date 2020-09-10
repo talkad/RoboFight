@@ -1,3 +1,4 @@
+import re
 import threading
 
 import pygame
@@ -76,9 +77,10 @@ class Login(Observer):
     # otherwise, a new game will start
     def handle_return(self):
         # send nickname for connection
-        connection_starter.conn.write('CONNECT', self.text)
-        self.board.name = self.text
-        self.text = ""
+        if len(self.text) > 2:
+            connection_starter.conn.write('CONNECT', self.text)
+            self.board.player.name = self.text
+            self.text = ""
 
     def start_match(self):
         self.is_login = False
@@ -108,3 +110,4 @@ connection_thread.join()
 
 
 # run through terminal:  python -m PresentationLayer.Login
+

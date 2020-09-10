@@ -10,7 +10,6 @@ class ConnectionHandler:
         self.host = host
         self.port = port
         self.msg_protocol = MessagingProtocol()
-        self.nickname = ''
 
     def connect(self):
         self.client.connect((self.host, self.port))
@@ -27,10 +26,8 @@ class ConnectionHandler:
                 break
 
     def write(self, command, message):
-        if command == 'CONNECT':
-            # send nickname to server
-            self.client.send(f'CONNECT:{message}\n'.encode('utf-8'))
-            self.nickname = message
+        if command == 'CONNECT' or command == 'LOCATION':
+            self.client.send(f'{command}:{message}\n'.encode('utf-8'))
         else:
             message = 'SEND:{0}:{1}'.format(self.msg_protocol.data.opponent_id, message)
             message += '\n'  # framing style: messages end with new-lines
