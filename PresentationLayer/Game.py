@@ -52,22 +52,28 @@ class Game(Observer):
     def game_cycle(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT]:
-            if self.background_x > -1000 and self.player.rect.centerx == WIDTH / 2:
-                self.background_x -= PLAYER_ACC * 2
-                self.platforms_movement_mode(True)
-                self.shields_movement_mode(True)
-            else:
-                self.platforms_movement_mode(False)
-                self.shields_movement_mode(False)
+            self.move_bg_right()
 
         if keys[pygame.K_LEFT]:
-            if self.background_x < 1000 and self.player.rect.centerx == WIDTH / 2:
-                self.background_x += PLAYER_ACC * 2
-                self.platforms_movement_mode(True)
-                self.shields_movement_mode(True)
-            else:
-                self.platforms_movement_mode(False)
-                self.shields_movement_mode(False)
+            self.move_bg_left()
+
+    def move_bg_right(self):
+        if self.background_x > -1000 and self.player.rect.centerx == WIDTH / 2:
+            self.background_x -= PLAYER_ACC * 2
+            self.platforms_movement_mode(True)
+            self.shields_movement_mode(True)
+        else:
+            self.platforms_movement_mode(False)
+            self.shields_movement_mode(False)
+
+    def move_bg_left(self):
+        if self.background_x < 1000 and self.player.rect.centerx == WIDTH / 2:
+            self.background_x += PLAYER_ACC * 2
+            self.platforms_movement_mode(True)
+            self.shields_movement_mode(True)
+        else:
+            self.platforms_movement_mode(False)
+            self.shields_movement_mode(False)
 
     # start a new game
     def new(self):
@@ -93,11 +99,10 @@ class Game(Observer):
 
             platform_height = get_max(legal_hits)
             if platform_height != -1:
-                # self.player.pos.y = hits[0].rect.top
                 self.player.pos.y = get_max(legal_hits)
                 self.player.vel.y = 0
 
-        # # check if a bullet hits a platform
+        # # check if a bullet hits a platform - removed this functionality because of high use of the CPU
         # bullet_hits = pygame.sprite.groupcollide(self.bullets, self.platforms, True, False)
         # for bullet in bullet_hits:
         #     explosion = Explosion(bullet.rect.center)
