@@ -22,9 +22,6 @@ FPS = 60
 clock.tick(FPS)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-filepath = os.path.dirname(__file__)
-explosion_sound = pygame.mixer.Sound(os.path.join(filepath, "../sound/Explosion.wav"))
-
 # generate the chat textbox
 text_box = pygame.Rect(50, HEIGHT - 45, 300, 25)
 
@@ -42,6 +39,7 @@ class Game(Observer):
         self.player = player_robot(WIDTH / 2, HEIGHT - 70, self)
         self.opponent = opponent_robot(WIDTH / 2, HEIGHT - 70, self)
         self.running = True
+        self.game_over = False
 
     # every cycle of the game, one of two things could happen:
     # 1. the board boundary didnt reach- so the background scrolls
@@ -124,7 +122,6 @@ class Game(Observer):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and not self.text_mode:
                 self.player.shoot()
-                explosion_sound.play()
             elif self.text_mode:
                 self.text = concat_char(self.text, pygame.key.name(event.key))
                 if pygame.key.name(event.key) == 'return':
@@ -145,36 +142,49 @@ class Game(Observer):
 
     # draw all objects on the screen
     def draw(self):
-        # draw background
-        self.game_cycle()
-        rel_x = self.background_x % background.get_rect().width
-        screen.blit(background, (rel_x - background.get_rect().width, 0))
-        if rel_x < WIDTH:
-            screen.blit(background, (rel_x, 0))
+        if not self.game_over:
+            # draw background
+            self.game_cycle()
+            rel_x = self.background_x % background.get_rect().width
+            screen.blit(background, (rel_x - background.get_rect().width, 0))
+            if rel_x < WIDTH:
+                screen.blit(background, (rel_x, 0))
 
-        self.all_sprites.draw(screen)
+            self.all_sprites.draw(screen)
 
-        # draw all text on screen
-        draw_text(screen, "position: ({:f}, {:f})".format(self.player.pos.x - self.background_x,
-                                                          self.player.pos.y),
-                  20, WIDTH / 2, 10, 'black')
+            # draw all text on screen
+            draw_text(screen, "position: ({:f}, {:f})".format(self.player.pos.x - self.background_x,
+                                                              self.player.pos.y),
+                      20, WIDTH / 2, 10, 'black')
 
-        # draw textbox on screen
-        if self.text_mode:
-            draw_text(screen, "Chat: ", 20, 30, HEIGHT - 40, "white")
+            # draw textbox on screen
+            if self.text_mode:
+                draw_text(screen, "Chat: ", 20, 30, HEIGHT - 40, "white")
 
-        pygame.draw.rect(screen, pygame.Color('white'), text_box, 0)
-        text_color = "black"
-        if len(self.text) >= 40:
-            text_color = "red"
-        draw_text(screen, self.text, 15, 200, HEIGHT - 40, text_color)
+            pygame.draw.rect(screen, pygame.Color('white'), text_box, 0)
+            text_color = "black"
+            if len(self.text) >= 40:
+                text_color = "red"
+            draw_text(screen, self.text, 15, 200, HEIGHT - 40, text_color)
 
-        # draw chat
-        draw_msg_stack(screen, self.chat, 15, "black")
+            # draw chat
+            draw_msg_stack(screen, self.chat, 15, "black")
 
-        # draw shields
-        draw_shield_bar(screen, 5, 5, self.player.shield, 'green')
-        draw_shield_bar(screen, WIDTH - 155, 5, self.opponent.shield, 'red')
+            # draw shields
+            draw_shield_bar(screen, 5, 5, self.player.shield, 'green')
+            draw_shield_bar(screen, WIDTH - 155, 5, self.opponent.shield, 'red')
+
+        else:  # draw game over screen
+            screen.blit(background, (0, 0))
+            display_winner = 'The winner is: '
+            draw_text(screen, "Game Over", 80, 180, 260, "white")
+
+            if self.player.shield == 0:
+                display_winner += connection_starter.conn.msg_protocol.data.opponent_name
+            else:
+                display_winner += self.player.name
+
+            draw_text(screen, display_winner, 60, 400, 400, "white")
 
         # after drawing everything, flip the display
         pygame.display.flip()
@@ -197,6 +207,8 @@ class Game(Observer):
             self.opponent.change_state(x_pos, float(match.group(2)), match.group(3), match.group(4))
         elif 'SHOOT:' in msg:
             self.opponent.shoot()
+        elif 'DEAD:' in msg:
+            self.opponent.die()
 
 
 # python -m PresentationLayer.Login

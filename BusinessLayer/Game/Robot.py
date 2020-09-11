@@ -11,6 +11,8 @@ vec = pygame.math.Vector2
 
 filepath = os.path.dirname(__file__)
 
+explosion_sound = pygame.mixer.Sound(os.path.join(filepath, "../../sound/Explosion.wav"))
+
 robot_sprite = {'Idle': [[], 10], 'Jump': [[], 10], 'Run': [[], 8],
                 'Shoot': [[], 4], 'Slide': [[], 10], 'Dead': [[], 10]}
 
@@ -58,12 +60,20 @@ class Robot(pygame.sprite.Sprite):
         pass
 
     def generate_bullet(self):
-        x_offset = 75
+        # make sound
+        explosion_sound.play()
+
+        x_offset = 80
         if self.last_direction == DIRECTIONS[0]:
-            x_offset = -75
+            x_offset = -90
         bullet = Bullet(self.rect.centerx + x_offset, self.rect.centery, self.last_direction, self.name)
         self.game.all_sprites.add(bullet)
         self.game.bullets.add(bullet)
+
+    def die(self):
+        robot = dead_robot(self.rect.center, self.game)
+        self.game.all_sprites.add(robot)
+        self.kill()
 
     # update the current frame of the sprite according the last direction the robot moved
     def sprite_by_direction(self, sprite):
@@ -124,6 +134,11 @@ class player_robot(Robot):
                     self.rect.bottom = HEIGHT - 10
             else:
                 self.rect.midbottom = self.pos
+
+            # check if the robot is dead
+            if self.shield == 0:
+                connection_starter.conn.write('DEAD', f'{connection_starter.conn.msg_protocol.data.opponent_id}:ok')
+                self.die()
 
     def move_right(self):
         self.current_pos = "Run"
@@ -201,3 +216,28 @@ class opponent_robot(Robot):
     def shoot(self):
         self.generate_bullet()
 
+
+class dead_robot(pygame.sprite.Sprite):
+    def __init__(self, center, board):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = robot_sprite['Dead'][0][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.last_update = pygame.time.get_ticks()
+        self.frame_rate = 40
+        self.game = board
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > self.frame_rate:
+            self.last_update = now
+            self.frame += 1
+            if self.frame == robot_sprite['Dead'][1]:
+                self.kill()
+                self.game.game_over = True
+            else:
+                center = self.rect.center
+                self.image = robot_sprite['Dead'][0][self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.center = center
