@@ -26,12 +26,12 @@ class ConnectionHandler:
                 break
 
     def write(self, command, message):
-        if command == 'CONNECT' or command == 'LOCATION':
-            self.client.send(f'{command}:{message}\n'.encode('utf-8'))
-        else:
+        if command == 'SEND':
             message = 'SEND:{0}:{1}'.format(self.msg_protocol.data.opponent_id, message)
             message += '\n'  # framing style: messages end with new-lines
             self.client.send(message.encode('utf-8'))
+        else:
+            self.client.send(f'{command}:{message}\n'.encode('utf-8'))
 
     def terminate_connection(self):
         self.msg_protocol.terminate()

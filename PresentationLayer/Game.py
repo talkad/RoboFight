@@ -90,9 +90,22 @@ class Game(Observer):
                 self.player.pos.y = get_max(legal_hits)
                 self.player.vel.y = 0
 
-        # check if a bullet hits a platform
-        bullet_hits = pygame.sprite.groupcollide(self.bullets, self.platforms, True, False)
-        for bullet in bullet_hits:
+        # # check if a bullet hits a platform
+        # bullet_hits = pygame.sprite.groupcollide(self.bullets, self.platforms, True, False)
+        # for bullet in bullet_hits:
+        #     explosion = Explosion(bullet.rect.center)
+        #     self.all_sprites.add(explosion)
+
+        # check if a bullet hits a robot
+        opponent_hits = pygame.sprite.spritecollide(self.opponent, self.bullets, True)
+        for bullet in opponent_hits:
+            self.opponent.shield -= 20
+            explosion = Explosion(bullet.rect.center)
+            self.all_sprites.add(explosion)
+
+        player_hits = pygame.sprite.spritecollide(self.player, self.bullets, True)
+        for bullet in player_hits:
+            self.player.shield -= 20
             explosion = Explosion(bullet.rect.center)
             self.all_sprites.add(explosion)
 
@@ -124,6 +137,7 @@ class Game(Observer):
         # check for closing window
         if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == pygame.K_ESCAPE):
             self.running = False
+            connection_starter.conn.terminate_connection()
             pygame.quit()
             sys.exit()
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
@@ -178,8 +192,11 @@ class Game(Observer):
         if 'SEND:' in msg:
             self.add_msg(subject.opponent_name, content)
         elif 'LOCATION:' in msg:
-            match = re.match(r'\(([-/+]?\d+\.\d+),([-/+]?\d+\.\d+)\):(\S+):(\S+)', content)
+            match = re.match(r'\(([-/+]?\d+\.\d+),([-/+]?\d+\.\d+)\):(\S+):(\S+)', content)  # regex
             x_pos = float(match.group(1)) + self.background_x
             self.opponent.change_state(x_pos, float(match.group(2)), match.group(3), match.group(4))
+        elif 'SHOOT:' in msg:
+            self.opponent.shoot()
+
 
 # python -m PresentationLayer.Login

@@ -6,7 +6,7 @@ from BusinessLayer.Game.Settings import DIRECTIONS
 
 filepath = os.path.dirname(__file__)
 
-SPEED = 10
+SPEED = 20
 bullet_sprite = {'Bullet': [[], 5], 'Muzzle': [[], 5]}
 
 
@@ -22,7 +22,7 @@ def create_sprite():
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction):
+    def __init__(self, x, y, direction, shooter):
         pygame.sprite.Sprite.__init__(self)
         create_sprite()
         self.image = bullet_sprite['Bullet'][0][0]
@@ -34,6 +34,7 @@ class Bullet(pygame.sprite.Sprite):
         self.last_update = pygame.time.get_ticks()
         self.frame_rate = 55
         self.direction = direction
+        self.shooter_name = shooter
 
     # update the current frame of the sprite according the last direction the robot moved
     def sprite_by_direction(self, sprite):
@@ -55,7 +56,7 @@ class Bullet(pygame.sprite.Sprite):
         else:
             self.rect.x -= SPEED
 
-        # kill if it moves off the top of the screen
+        # kill if it passed the board limits
         if self.rect.left > 1850 or self.rect.left < -1000:
             self.kill()
 

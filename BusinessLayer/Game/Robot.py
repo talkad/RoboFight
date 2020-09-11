@@ -14,7 +14,7 @@ filepath = os.path.dirname(__file__)
 robot_sprite = {'Idle': [[], 10], 'Jump': [[], 10], 'Run': [[], 8],
                 'Shoot': [[], 4], 'Slide': [[], 10], 'Dead': [[], 10]}
 
-send_location_freq = 75
+send_location_freq = 50
 
 
 # generate a map structure that contains all the states the robot can be during the game
@@ -53,6 +53,18 @@ class Robot(pygame.sprite.Sprite):
     def update(self):
         pass
 
+    @abstractmethod
+    def shoot(self):
+        pass
+
+    def generate_bullet(self):
+        x_offset = 75
+        if self.last_direction == DIRECTIONS[0]:
+            x_offset = -75
+        bullet = Bullet(self.rect.centerx + x_offset, self.rect.centery, self.last_direction, self.name)
+        self.game.all_sprites.add(bullet)
+        self.game.bullets.add(bullet)
+
     # update the current frame of the sprite according the last direction the robot moved
     def sprite_by_direction(self, sprite):
         img = robot_sprite[sprite][0][self.frame % robot_sprite[sprite][1]]
@@ -90,7 +102,7 @@ class player_robot(Robot):
             # the bend-sprite isn't aligned like the other sprites,
             # and thus makes some difficulties in the collision.
             # elif key_state[pygame.K_DOWN]:
-                # self.bend()
+            # self.bend()
             elif key_state[pygame.K_UP]:
                 self.jump()
             elif key_state[pygame.K_SPACE]:
@@ -160,12 +172,10 @@ class player_robot(Robot):
         self.sprite_by_direction("Shoot")
 
     def shoot(self):
-        x_offset = 30
-        if self.last_direction == DIRECTIONS[0]:
-            x_offset = -30
-        bullet = Bullet(self.rect.centerx + x_offset, self.rect.centery, self.last_direction)
-        self.game.all_sprites.add(bullet)
-        self.game.bullets.add(bullet)
+        self.generate_bullet()
+
+        # send to the opponent
+        connection_starter.conn.write('SHOOT', f'{connection_starter.conn.msg_protocol.data.opponent_id}:ok')
 
 
 class opponent_robot(Robot):
@@ -187,3 +197,7 @@ class opponent_robot(Robot):
         self.pos = vec(x_pos, y_pos)
         self.last_direction = direction
         self.current_pos = current_pos
+
+    def shoot(self):
+        self.generate_bullet()
+

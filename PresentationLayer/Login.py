@@ -51,6 +51,7 @@ class Login(Observer):
 
         # check for closing window
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            connection_starter.conn.terminate_connection()
             self.running = False
 
     # draw all objects on the screen
