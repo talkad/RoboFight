@@ -1,7 +1,6 @@
 import threading
 
 import pygame
-
 from PresentationLayer.Game import Game
 from PresentationLayer.Observer import Observer
 from PresentationLayer.Service import screen, background, concat_char, draw_text, connection_starter

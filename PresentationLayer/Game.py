@@ -3,12 +3,13 @@ import sys
 import re
 import pygame
 from pygame.locals import *
-
+from random import randint
 from BusinessLayer.Client.MessagingProtocol import get_content
 from BusinessLayer.Game.Platform import Platform
 from BusinessLayer.Game.Robot import player_robot, opponent_robot
 from BusinessLayer.Game.Bullet import Explosion
 from BusinessLayer.Game.Settings import WIDTH, PLAYER_ACC, HEIGHT, PLATFORM_LIST
+from BusinessLayer.Game.Shield import Shield
 from PresentationLayer.Observer import Observer
 from PresentationLayer.Service import draw_text, concat_char, get_max, draw_shield_bar, draw_msg_stack, background, \
     screen, connection_starter
@@ -24,6 +25,7 @@ os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 # generate the chat textbox
 text_box = pygame.Rect(50, HEIGHT - 45, 300, 25)
+shield_freq = 2500
 
 
 class Game(Observer):
@@ -35,11 +37,14 @@ class Game(Observer):
         self.platforms = pygame.sprite.Group()
         self.platforms_list = []
         self.bullets = pygame.sprite.Group()
+        self.shields = pygame.sprite.Group()
+        self.shield_list = []
         self.background_x = 0
         self.player = player_robot(WIDTH / 2, HEIGHT - 70, self)
         self.opponent = opponent_robot(WIDTH / 2, HEIGHT - 70, self)
         self.running = True
         self.game_over = False
+        self.last_shield = pygame.time.get_ticks()
 
     # every cycle of the game, one of two things could happen:
     # 1. the board boundary didnt reach- so the background scrolls
@@ -50,15 +55,19 @@ class Game(Observer):
             if self.background_x > -1000 and self.player.rect.centerx == WIDTH / 2:
                 self.background_x -= PLAYER_ACC * 2
                 self.platforms_movement_mode(True)
+                self.shields_movement_mode(True)
             else:
                 self.platforms_movement_mode(False)
+                self.shields_movement_mode(False)
 
         if keys[pygame.K_LEFT]:
             if self.background_x < 1000 and self.player.rect.centerx == WIDTH / 2:
                 self.background_x += PLAYER_ACC * 2
                 self.platforms_movement_mode(True)
+                self.shields_movement_mode(True)
             else:
                 self.platforms_movement_mode(False)
+                self.shields_movement_mode(False)
 
     # start a new game
     def new(self):
@@ -106,6 +115,22 @@ class Game(Observer):
             self.player.shield -= 20
             explosion = Explosion(bullet.rect.center)
             self.all_sprites.add(explosion)
+
+        # check if a shield hits a robot
+        opponent_hits = pygame.sprite.spritecollide(self.opponent, self.shields, True)
+        self.opponent.shield = min(self.opponent.shield + 20 * len(opponent_hits), 100)
+
+        player_hits = pygame.sprite.spritecollide(self.player, self.shields, True)
+        self.player.shield = min(self.player.shield + 20 * len(player_hits), 100)
+
+        now = pygame.time.get_ticks()
+        if now - self.last_shield > shield_freq:
+            x = randint(-900, 1900)
+            self.generate_shield(x)
+
+            # send the robot location to opponent
+            connection_starter.conn.write('SHIELD', f'{connection_starter.conn.msg_protocol.data.opponent_id}:{x}')
+            self.last_shield = now
 
     def game_events(self, event):
         # too many tasks for a single thread- i would ignore this functionality for now
@@ -196,6 +221,16 @@ class Game(Observer):
         for p in self.platforms_list:
             p.change_mode(mode)
 
+    def shields_movement_mode(self, mode):
+        for p in self.shield_list:
+            p.change_mode(mode)
+
+    def generate_shield(self, x):
+        shield = Shield(x)
+        self.all_sprites.add(shield)
+        self.shields.add(shield)
+        self.shield_list.append(shield)
+
     def observer_update(self, subject):
         msg = subject.received_msg
         content = get_content(msg)
@@ -207,6 +242,9 @@ class Game(Observer):
             self.opponent.change_state(x_pos, float(match.group(2)), match.group(3), match.group(4))
         elif 'SHOOT:' in msg:
             self.opponent.shoot()
+        elif 'SHIELD:' in msg:
+            match = re.match(r'([-/+]?\d+)', content)  # regex
+            self.generate_shield(int(match.group(1)))
         elif 'DEAD:' in msg:
             self.opponent.die()
 
